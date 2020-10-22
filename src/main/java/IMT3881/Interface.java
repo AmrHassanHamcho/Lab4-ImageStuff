@@ -17,12 +17,79 @@ public class Interface extends JFrame implements ChangeListener {
 
     // J slider slidebar
     static final int S_MIN = 0;
-    static final int S_1 = 20;
-    static final int S_2 = 50;
     static final int S_MAX = 70;
     private JSlider slider;
     private JLabel label;
     private int value; // value from slideBar
+
+    // Menus
+    JMenuBar menuBar;
+    JMenu menuOp, menuIm;
+    JMenuItem menuBright, menuBinary, menuSmooth, menuUpload;
+
+    public Interface() {
+        frame = new JFrame("frame");
+        frame.setSize(1000, 1000);
+        frame.setVisible(true);
+        frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        frame.setLayout(null);
+        frame.setLocationRelativeTo(null);
+    }
+
+    public void navigationBar() {
+
+        // Main Menu bar
+        menuBar = new JMenuBar();
+
+        // Menu to operate on an Image
+        menuOp = new JMenu("Operation");
+
+        // Menu to upload an image
+        menuIm = new JMenu("Image");
+
+        // Menu items to opration menu
+        menuBright = new JMenuItem("Brightness");
+        menuBinary = new JMenuItem("Binary");
+        menuSmooth = new JMenuItem("Smoothness");
+
+        // Menu items to Image menu
+        menuUpload = new JMenuItem("Upload an Image");
+
+        // Action listeners
+        menuUpload.addActionListener(a -> {
+            readImage();
+            menuBright.setEnabled(true);
+            menuBinary.setEnabled(true);
+            menuSmooth.setEnabled(true);
+        });
+
+        menuBright.addActionListener(a -> {
+            uploadImage(brightImage(orig_img));
+            info.setText("After");
+        });
+
+        menuBinary.addActionListener(a -> {
+            uploadImage(binaryImage(orig_img));
+            info.setText("After");
+        });
+
+        // Disable before image
+        menuBright.setEnabled(false);
+        menuBinary.setEnabled(false);
+        menuSmooth.setEnabled(false);
+
+        // add items to menus
+        menuOp.add(menuBright);
+        menuOp.add(menuBinary);
+        menuOp.add(menuSmooth);
+
+        menuIm.add(menuUpload);
+
+        menuBar.add(menuOp);
+        menuBar.add(menuIm);
+
+        frame.setJMenuBar(menuBar);
+    }
 
     private void slideBar() {
         slider = new JSlider(JSlider.HORIZONTAL, S_MIN, S_MAX, 0);
@@ -33,15 +100,6 @@ public class Interface extends JFrame implements ChangeListener {
 
         frame.add(slider);
         slider.addChangeListener(this);
-    }
-
-    public Interface() {
-        frame = new JFrame("frame");
-        frame.setSize(1000, 1000);
-        frame.setVisible(true);
-        frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        frame.setLayout(null);
-        frame.setLocationRelativeTo(null);
     }
 
     public BufferedImage readImage() {
@@ -103,7 +161,6 @@ public class Interface extends JFrame implements ChangeListener {
 
             }
         }
-
         return bi;
     }
 
@@ -140,8 +197,6 @@ public class Interface extends JFrame implements ChangeListener {
             }
         }
 
-        uploadImage(bright_image);
-
         return bright_image;
     }
 
@@ -155,50 +210,6 @@ public class Interface extends JFrame implements ChangeListener {
         frame.add(img_label);
 
         return img_label;
-    }
-
-    public void navigationBar() {
-
-        // Main Menu bar
-        JMenuBar menuBar = new JMenuBar();
-
-        // Menu to operate on an Image
-        JMenu menuOp = new JMenu("Operation");
-
-        // Menu to upload an image
-        JMenu menuIm = new JMenu("Image");
-
-        // Menu items to opration menu
-        JMenuItem menuBright = new JMenuItem("Brightness");
-        JMenuItem menuBinary = new JMenuItem("Binary");
-        JMenuItem menuSmooth = new JMenuItem("Smoothness");
-
-        // Menu items to Image menu
-        JMenuItem menuUpload = new JMenuItem("Upload an Image");
-
-        // action listners
-        menuUpload.addActionListener(a -> readImage());
-        // menuBright.addActionListener(a->);
-        // add MenuBar to frame
-        frame.setJMenuBar(menuBar);
-        // add Menus to MenuBar
-        menuBar.add(menuOp);
-        menuBar.add(menuIm);
-
-        // add action listner to menuBright
-        menuBright.addActionListener(a -> brightImage(orig_img));
-
-        // add items to menus
-        menuOp.add(menuBright);
-        // add action listner to binary menuitem
-        menuBinary.addActionListener(a -> {
-            uploadImage(binaryImage(orig_img));
-            info.setText("After");
-        });
-        menuOp.add(menuBinary);
-        menuOp.add(menuSmooth);
-        menuIm.add(menuUpload);
-
     }
 
     @Override
