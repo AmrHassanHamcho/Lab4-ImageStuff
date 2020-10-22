@@ -2,16 +2,38 @@ package IMT3881;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public class Interface extends JFrame {
+public class Interface extends JFrame implements ChangeListener {
 
     private static  JFrame frame;
-    private BufferedImage img;
+    private BufferedImage orig_img;
+    private JLabel info = new JLabel("Please choose the operation from the Menu bar");
 
+    //J slider slidebar
+    static final int S_MIN = 0;
+    static final int S_1 = 20;
+    static final int S_2 = 50;
+    static final int S_MAX = 70;
+    private JSlider slider;
+    private JLabel label;
+    private int value; //value from slideBar
+
+    private void slideBar(){
+        slider = new JSlider(JSlider.HORIZONTAL, S_MIN, S_MAX, 0);
+        slider.setMajorTickSpacing(20);
+        slider.setPaintTicks(true);
+        slider.setBounds(100,500,350,350);
+        slider.setVisible(true);
+
+        frame.add(slider);
+        slider.addChangeListener(this);
+    }
 
 
 
@@ -25,11 +47,12 @@ public class Interface extends JFrame {
 
     }
 
-    public void uploadImageActionPerformed(){
+    public BufferedImage readImage(){
 
         JFileChooser filechooser = new JFileChooser();
         filechooser.setDialogTitle("Choose Your File");
         filechooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
         // below code selects the file
         int returnval = filechooser.showOpenDialog(this);
         if (returnval == JFileChooser.APPROVE_OPTION)
@@ -38,31 +61,32 @@ public class Interface extends JFrame {
 
             try {
                 // display the image in a Jlabel
-                img = ImageIO.read(file);
-                JLabel imgLabel_1 = new JLabel("       Before");
-                JLabel imgLabel_2 = new JLabel("       After");
-                imgLabel_1.setIcon(new ImageIcon(img));// original pic
-                imgLabel_1.setBounds(100,0,350,350);
-                frame.add(imgLabel_1);
+                this.orig_img = ImageIO.read(file);
+                JLabel orig_img_label = new JLabel("");
+                orig_img_label.setIcon(new ImageIcon(orig_img)); // original pic
+                orig_img_label.setBounds(100,0,350,350);
+                //orig_img.repaint();
+                frame.add(orig_img_label);
 
-                // after binary operation
-                BufferedImage binaryImg = binaryImage(img);
-                imgLabel_2.setIcon(new ImageIcon(binaryImg));
-                imgLabel_2.setBounds(100,350,350,350);
-                frame.add(imgLabel_2);
+                info.setBounds(100,150,350,350);
+                frame.add(info);
+
+
 
             } catch(IOException e) {
                 e.printStackTrace();
             }
-            this.pack();
-        }
 
+
+        }
+            return orig_img;
     }
+
+
     public BufferedImage binaryImage (BufferedImage img){
+
         int height = img.getHeight();
-        System.out.println("binary img height is: " + height);
         int width = img.getWidth();
-        System.out.println("binary img width is: " + width);
         BufferedImage bi = new BufferedImage(width,height, BufferedImage.TYPE_INT_RGB);
 
         for (int i = 0; i < width; i++)
@@ -94,7 +118,66 @@ public class Interface extends JFrame {
         return bi;
     }
 
-    public void navigationBar (){
+    private BufferedImage brightImage (BufferedImage img){
+
+        slideBar();
+        int height = img.getHeight();
+        int width = img.getWidth();
+        BufferedImage bright_image = new BufferedImage(width,height, BufferedImage.TYPE_INT_RGB);
+
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                int pixel = img.getRGB(i,j);
+                //Creating a Color object from pixel value
+                Color color = new Color(pixel, true);
+                //Retrieving the R G B values
+                int red = color.getRed();
+                int green = color.getGreen();
+                int blue = color.getBlue();
+
+                // get the sum of RGB pixels values
+                int sum = red + green + blue;
+                // 255 + 255 + 255 = 765 (sum of RGB pixels)
+
+
+               if (value == 20){
+                   if(sum + value <= 765){
+                        sum = sum + value;
+                   }
+                    else{
+                        sum = 765;
+                   }
+                   bright_image.setRGB(i , j , sum);
+               }
+
+
+
+            }
+        }
+
+
+        uploadImage(bright_image);
+
+
+
+        return bright_image;
+    }
+
+    private JLabel uploadImage(BufferedImage img){
+
+        JLabel img_label = new JLabel("");
+        img_label.setIcon(new ImageIcon(img));
+        img_label.setBounds(100,360,350,350);
+        //img_label.repaint();
+        frame.add(img_label);
+
+        return img_label;
+    }
+    public void navigationBar(){
+
+
 
         // Main Menu bar
         JMenuBar menuBar = new JMenuBar();
@@ -112,15 +195,25 @@ public class Interface extends JFrame {
 
         // Menu items to Image menu
         JMenuItem menuUpload = new JMenuItem("Upload an Image");
-        menuUpload.addActionListener(a->uploadImageActionPerformed());
+
+        //action listners
+        menuUpload.addActionListener(a->readImage());
+        //menuBright.addActionListener(a->);
         // add MenuBar to frame
         frame.setJMenuBar(menuBar);
         //add Menus to MenuBar
         menuBar.add(menu);
         menuBar.add(menuIm);
 
+        //add action listner to menuBright
+        menuBright.addActionListener(a->brightImage(orig_img));
+
         //add items to menus
         menu.add(menuBright);
+        //add action listner to binary menuitem
+        menuBinary.addActionListener(a->{uploadImage(binaryImage(orig_img));
+        info.setText("After");
+        });
         menu.add(menuBinary);
         menu.add(menuSmooth);
         menuIm.add(menuUpload);
@@ -131,7 +224,8 @@ public class Interface extends JFrame {
     }
 
 
-
-
-
+    @Override
+    public void stateChanged(ChangeEvent e) {
+        this.value = slider.getValue();
+    }
 }
