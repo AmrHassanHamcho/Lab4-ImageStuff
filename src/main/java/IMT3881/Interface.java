@@ -13,9 +13,9 @@ public class Interface extends JFrame  {
 
 
     private static JFrame frame;
-
     private BufferedImage orig_img;
     private JLabel info = new JLabel("Please choose the operation from the Menu bar");
+    private JLabel orig_img_label;
 
     // J slider slidebar
     static final int S_MIN = 0;
@@ -29,13 +29,7 @@ public class Interface extends JFrame  {
     JMenuBar menuBar;
     JMenu menuOp, menuIm;
     JMenuItem menuBright, menuBinary, menuSmooth, menuUpload;
-
-    public Interface() {
-
-
     Event e ;
-    private int value ;
-
 
     public Interface (){
        this.e = new Event();
@@ -77,8 +71,17 @@ public class Interface extends JFrame  {
         });
 
         menuBright.addActionListener(a -> {
-            uploadImage(brightImage(orig_img));
-            info.setText("After");
+BufferedImage bright_image = brightImage(orig_img);
+
+            JSlider slider = new JSlider();
+            slider = e.slideBar();
+            slider.addChangeListener(e1 -> orig_img_label.setIcon(new ImageIcon(bright_image)));
+            frame.add(slider);
+
+          //  uploadImage(brightImage(orig_img));
+           // info.setText("After");
+
+            orig_img_label.setIcon(new ImageIcon(brightImage(orig_img)));
         });
 
         menuBinary.addActionListener(a -> {
@@ -104,7 +107,7 @@ public class Interface extends JFrame  {
         frame.setJMenuBar(menuBar);
     }
 
-    private void slideBar() {
+   /* private void slideBar() {
         slider = new JSlider(JSlider.HORIZONTAL, S_MIN, S_MAX, 0);
         slider.setMajorTickSpacing(20);
         slider.setPaintTicks(true);
@@ -112,8 +115,8 @@ public class Interface extends JFrame  {
         slider.setVisible(true);
 
         frame.add(slider);
-        slider.addChangeListener(this);
-    }
+        slider.addChangeListener(e);
+    }*/
 
     public BufferedImage readImage() {
 
@@ -130,7 +133,7 @@ public class Interface extends JFrame  {
                 // display the image in a Jlabel
                 this.orig_img = ImageIO.read(file);
                 ImageIcon original = new ImageIcon(orig_img);
-                JLabel orig_img_label = new JLabel(original);
+                orig_img_label = new JLabel(original);
                 orig_img_label.setBounds(100, 0, original.getIconWidth(), original.getIconHeight());
                 // orig_img.repaint();
                 frame.add(orig_img_label);
@@ -179,11 +182,7 @@ public class Interface extends JFrame  {
 
     private BufferedImage brightImage(BufferedImage img) {
 
-        JSlider slider = new JSlider();
-        slider = e.slideBar();
-        slider.addChangeListener(e);
-        frame.add(slider);
-        System.out.println("the value is" + this.e.getValue());
+
 
 
         int height = img.getHeight();
@@ -208,9 +207,11 @@ public class Interface extends JFrame  {
                 int new_blue = blue + value;
 
 
-                if (value == 20) {
+                if (value == 20 || value == 50 || value == 70) {
                     if (sum + value <= 765) {
                         sum = sum + value;
+                        System.out.println("Value: "+value);
+                        System.out.println("e.get.Value(): "+e.getValue());
                     } else {
                         sum = 765;
                     }
@@ -234,7 +235,6 @@ public class Interface extends JFrame  {
 
             }
         }
-
 
         return bright_image;
     }
