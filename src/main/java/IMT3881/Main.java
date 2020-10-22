@@ -1,10 +1,13 @@
 package IMT3881;
 
+import java.awt.*;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("test");
-        Interface inter = new Interface();
-        inter.navigationBar();
+        EventQueue.invokeLater(()->{ Interface inter = new Interface();
+            inter.navigationBar();});
+
+
 
 
     }
