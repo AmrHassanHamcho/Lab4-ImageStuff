@@ -9,15 +9,18 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public class Interface extends JFrame implements ChangeListener {
+public class Interface extends JFrame  {
+
 
     private static JFrame frame;
+
     private BufferedImage orig_img;
     private JLabel info = new JLabel("Please choose the operation from the Menu bar");
 
     // J slider slidebar
     static final int S_MIN = 0;
     static final int S_MAX = 70;
+
     private JSlider slider;
     private JLabel label;
     private int value; // value from slideBar
@@ -28,6 +31,16 @@ public class Interface extends JFrame implements ChangeListener {
     JMenuItem menuBright, menuBinary, menuSmooth, menuUpload;
 
     public Interface() {
+
+
+    Event e ;
+    private int value ;
+
+
+    public Interface (){
+       this.e = new Event();
+       this.value = e.getValue(); //value from slideBar
+
         frame = new JFrame("frame");
         frame.setSize(1000, 1000);
         frame.setVisible(true);
@@ -166,7 +179,13 @@ public class Interface extends JFrame implements ChangeListener {
 
     private BufferedImage brightImage(BufferedImage img) {
 
-        slideBar();
+        JSlider slider = new JSlider();
+        slider = e.slideBar();
+        slider.addChangeListener(e);
+        frame.add(slider);
+        System.out.println("the value is" + this.e.getValue());
+
+
         int height = img.getHeight();
         int width = img.getWidth();
         BufferedImage bright_image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -184,6 +203,10 @@ public class Interface extends JFrame implements ChangeListener {
                 // get the sum of RGB pixels values
                 int sum = red + green + blue;
                 // 255 + 255 + 255 = 765 (sum of RGB pixels)
+                int new_red = red + value;
+                int new_green = green + value;
+                int new_blue = blue + value;
+
 
                 if (value == 20) {
                     if (sum + value <= 765) {
@@ -194,8 +217,24 @@ public class Interface extends JFrame implements ChangeListener {
                     bright_image.setRGB(i, j, sum);
                 }
 
+                if(new_red > 255){
+                    new_red = 255;
+                }
+                else if (new_blue > 255){
+                    new_blue = 255;
+                }
+                else if(new_green > 255){
+                    new_green = 255;
+                }
+
+                Color new_color = new Color(new_red,new_green,new_blue);
+
+                int new_color_rgb = new_color.getRGB();
+                bright_image.setRGB(i , j , new_color_rgb);
+
             }
         }
+
 
         return bright_image;
     }
@@ -212,8 +251,5 @@ public class Interface extends JFrame implements ChangeListener {
         return img_label;
     }
 
-    @Override
-    public void stateChanged(ChangeEvent e) {
-        this.value = slider.getValue();
-    }
+
 }
