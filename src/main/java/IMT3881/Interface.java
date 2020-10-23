@@ -24,6 +24,8 @@ public class Interface extends JFrame  {
     private JSlider slider;
     private JLabel label;
     private int value; // value from slideBar
+    Event e ;
+
 
     // Menus
     JMenuBar menuBar;
@@ -33,11 +35,10 @@ public class Interface extends JFrame  {
     public Interface() {
 
 
-    Event e ;
-    private int value ;
 
 
-    public Interface (){
+
+
        this.e = new Event();
        this.value = e.getValue(); //value from slideBar
 
@@ -112,7 +113,7 @@ public class Interface extends JFrame  {
         slider.setVisible(true);
 
         frame.add(slider);
-        slider.addChangeListener(this);
+        slider.addChangeListener(e);
     }
 
     public BufferedImage readImage() {
