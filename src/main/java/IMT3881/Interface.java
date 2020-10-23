@@ -2,8 +2,6 @@ package IMT3881;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -17,34 +15,36 @@ public class Interface extends JFrame  {
     private JLabel info = new JLabel("Please choose the operation from the Menu bar");
     private JLabel orig_img_label;
 
-    // J slider slidebar
     static final int S_MIN = 0;
     static final int S_MAX = 70;
 
     private JSlider slider;
     private JLabel label;
+   private TheSlider theSlider;
     private int value; // value from slideBar
 
     // Menus
     JMenuBar menuBar;
     JMenu menuOp, menuIm;
     JMenuItem menuBright, menuBinary, menuSmooth, menuUpload;
-    Event e ;
+
 
     public Interface (){
-       this.e = new Event();
-       this.value = e.getValue(); //value from slideBar
+
 
         frame = new JFrame("frame");
         frame.setSize(1000, 1000);
-        frame.setVisible(true);
+
         frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
         frame.setLayout(null);
         frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+
     }
 
     public void navigationBar() {
 
+        theSlider = new TheSlider();
         // Main Menu bar
         menuBar = new JMenuBar();
 
@@ -71,17 +71,18 @@ public class Interface extends JFrame  {
         });
 
         menuBright.addActionListener(a -> {
-BufferedImage bright_image = brightImage(orig_img);
+            //uploadImage(brightImage(orig_img,this.value));
 
-            JSlider slider = new JSlider();
-            slider = e.slideBar();
-            slider.addChangeListener(e1 -> orig_img_label.setIcon(new ImageIcon(bright_image)));
+            slider = theSlider.slideBar();
+            slider.addChangeListener(e -> {
+                JSlider source = (JSlider) e.getSource();
+                value = source.getValue();
+                orig_img_label.setIcon(new ImageIcon(brightImage(orig_img,value)));
+
+
+            });
+
             frame.add(slider);
-
-          //  uploadImage(brightImage(orig_img));
-           // info.setText("After");
-
-            orig_img_label.setIcon(new ImageIcon(brightImage(orig_img)));
         });
 
         menuBinary.addActionListener(a -> {
@@ -95,28 +96,18 @@ BufferedImage bright_image = brightImage(orig_img);
         menuSmooth.setEnabled(false);
 
         // add items to menus
+        menuIm.add(menuUpload);
+        menuBar.add(menuIm);
+
         menuOp.add(menuBright);
         menuOp.add(menuBinary);
         menuOp.add(menuSmooth);
-
-        menuIm.add(menuUpload);
-
         menuBar.add(menuOp);
-        menuBar.add(menuIm);
+
 
         frame.setJMenuBar(menuBar);
     }
 
-   /* private void slideBar() {
-        slider = new JSlider(JSlider.HORIZONTAL, S_MIN, S_MAX, 0);
-        slider.setMajorTickSpacing(20);
-        slider.setPaintTicks(true);
-        slider.setBounds(100, 500, 350, 350);
-        slider.setVisible(true);
-
-        frame.add(slider);
-        slider.addChangeListener(e);
-    }*/
 
     public BufferedImage readImage() {
 
@@ -135,9 +126,9 @@ BufferedImage bright_image = brightImage(orig_img);
                 ImageIcon original = new ImageIcon(orig_img);
                 orig_img_label = new JLabel(original);
                 orig_img_label.setBounds(100, 0, original.getIconWidth(), original.getIconHeight());
-                // orig_img.repaint();
                 frame.add(orig_img_label);
-
+                //frame.add(orig_img_label);
+                orig_img_label.repaint();
                 info.setBounds(100, 150, 350, 350);
                 frame.add(info);
 
@@ -180,8 +171,7 @@ BufferedImage bright_image = brightImage(orig_img);
         return bi;
     }
 
-    private BufferedImage brightImage(BufferedImage img) {
-
+    private BufferedImage brightImage(BufferedImage img,int value) {
 
 
 
@@ -194,46 +184,56 @@ BufferedImage bright_image = brightImage(orig_img);
                 int pixel = img.getRGB(i, j);
                 // Creating a Color object from pixel value
                 Color color = new Color(pixel, true);
+
                 // Retrieving the R G B values
                 int red = color.getRed();
                 int green = color.getGreen();
                 int blue = color.getBlue();
 
+
                 // get the sum of RGB pixels values
                 int sum = red + green + blue;
                 // 255 + 255 + 255 = 765 (sum of RGB pixels)
-                int new_red = red + value;
-                int new_green = green + value;
-                int new_blue = blue + value;
 
+                int new_red =  red;//red + value;
+                int new_green = green;// + value;
+                int new_blue = blue;// + value;
 
-                if (value == 20 || value == 50 || value == 70) {
+                if (value == 20 || value == 30 || value == 70) {
+
+                    if(new_red + value<=255)
+                        new_red+=value;
+                    else if(new_green+value<=255)
+                         new_green += value;
+                    else if(new_blue+value<=255)
+                         new_blue += value;
                     if (sum + value <= 765) {
-                        sum = sum + value;
-                        System.out.println("Value: "+value);
-                        System.out.println("e.get.Value(): "+e.getValue());
+
+                        sum +=  value;
                     } else {
                         sum = 765;
                     }
                     bright_image.setRGB(i, j, sum);
+
+                    if(new_red >= 255){
+                        new_red = red;
+                    }
+                    else if (new_blue >= 255){
+                        new_blue = blue;
+                    }
+                    else if(new_green >= 255){
+                        new_green = green;
+                    }
                 }
 
-                if(new_red > 255){
-                    new_red = 255;
-                }
-                else if (new_blue > 255){
-                    new_blue = 255;
-                }
-                else if(new_green > 255){
-                    new_green = 255;
-                }
 
-                Color new_color = new Color(new_red,new_green,new_blue);
+                Color new_color = new Color(new_red, new_green, new_blue);
 
                 int new_color_rgb = new_color.getRGB();
-                bright_image.setRGB(i , j , new_color_rgb);
+                bright_image.setRGB(i, j, new_color_rgb);
 
             }
+
         }
 
         return bright_image;
@@ -244,9 +244,11 @@ BufferedImage bright_image = brightImage(orig_img);
         ImageIcon original = new ImageIcon(img);
         JLabel img_label = new JLabel(original);
         img_label.setBounds(100, 360, original.getIconWidth(), original.getIconHeight());
+        img_label.setIcon(original);
 
-        // img_label.repaint();
         frame.add(img_label);
+
+        img_label.repaint();
 
         return img_label;
     }
