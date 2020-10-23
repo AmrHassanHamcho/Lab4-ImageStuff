@@ -17,7 +17,7 @@ public class Event implements ChangeListener {
         slider.setMinorTickSpacing(20);
         slider.setVisible(true);
         slider.setPaintLabels(true);
-        slider.setBounds(100, 350, 350, 350);
+        slider.setBounds(100, 450, 350, 350);
 
         slider.addChangeListener(this::stateChanged);
         return slider;

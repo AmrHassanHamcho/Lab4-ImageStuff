@@ -8,11 +8,12 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class Interface extends JFrame {
 
     private static JFrame frame;
-    private BufferedImage orig_img;
+    private BufferedImage file_orig_img;
     private JLabel info = new JLabel("Please choose the operation from the Menu bar");
     private JLabel display_orig_image;
     private JLabel display_new_image;
@@ -58,7 +59,7 @@ public class Interface extends JFrame {
         menuBar = new JMenuBar();
 
         // Menu to operate on an Image
-        menuOp = new JMenu("Operatizon");
+        menuOp = new JMenu("Operation");
 
         // Menu to upload an image
         menuIm = new JMenu("Image");
@@ -80,21 +81,26 @@ public class Interface extends JFrame {
         });
 
         menuBright.addActionListener(a -> {
-            BufferedImage bright_image = brightImage(orig_img);
+            BufferedImage bright_image = brightImage(file_orig_img);
 
             slider = new JSlider();
             slider = e.slideBar();
             slider.addChangeListener(e1 -> display_orig_image.setIcon(new ImageIcon(bright_image)));
             frame.add(slider);
 
-            // uploadImage(brightImage(orig_img));
+            // uploadImage(brightImage(file_orig_img));
             // info.setText("After");
 
-            display_orig_image.setIcon(new ImageIcon(brightImage(orig_img)));
+            display_orig_image.setIcon(new ImageIcon(brightImage(file_orig_img)));
         });
 
         menuBinary.addActionListener(a -> {
-            uploadImage(binaryImage(orig_img));
+            uploadImage(binaryImage(file_orig_img));
+            info.setText("After");
+        });
+
+        menuSmooth.addActionListener(a -> {
+            uploadImage(smoothImage(file_orig_img));
             info.setText("After");
         });
 
@@ -137,14 +143,14 @@ public class Interface extends JFrame {
 
             try {
                 // display the image in a Jlabel
-                this.orig_img = ImageIO.read(file);
-                ImageIcon original_icon = new ImageIcon(orig_img);
+                this.file_orig_img = ImageIO.read(file);
+                ImageIcon original_icon = new ImageIcon(file_orig_img);
                 display_orig_image = new JLabel(original_icon);
                 display_orig_image.setBounds(100, 0, original_icon.getIconWidth(), original_icon.getIconHeight());
-                // orig_img.repaint();
+                // file_orig_img.repaint();
                 frame.add(display_orig_image);
 
-                info.setBounds(100, 150, 350, 350);
+                info.setBounds(10, 150, 350, 350);
                 frame.add(info);
 
             } catch (IOException e) {
@@ -152,44 +158,11 @@ public class Interface extends JFrame {
             }
 
         }
-        return orig_img;
-    }
-
-    public BufferedImage binaryImage(BufferedImage img) {
-        curr_action = BINARY;
-
-        int height = img.getHeight();
-        int width = img.getWidth();
-        BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                int pixel = img.getRGB(i, j);
-                // Creating a Color object from pixel value
-                Color color = new Color(pixel, true);
-                // Retrieving the R G B values
-                int red = color.getRed();
-                int green = color.getGreen();
-                int blue = color.getBlue();
-
-                // get the sum of RGB pixels values
-                int sum = red + green + blue;
-                // 150 + 150 + 150 = 450 (middle value given by prof)
-
-                if (sum >= 450) {
-                    bi.setRGB(i, j, Color.WHITE.getRGB()); // 255
-                } else {
-                    bi.setRGB(i, j, Color.BLACK.getRGB()); // 0
-                }
-
-            }
-        }
-        return bi;
+        return file_orig_img;
     }
 
     private BufferedImage brightImage(BufferedImage img) {
         curr_action = BRIGHT;
-        reset();
 
         int height = img.getHeight();
         int width = img.getWidth();
@@ -242,30 +215,101 @@ public class Interface extends JFrame {
         return bright_image;
     }
 
-    private void smoothImage() {
-        reset();
+    public BufferedImage binaryImage(BufferedImage img) {
+        curr_action = BINARY;
+
+        int height = img.getHeight();
+        int width = img.getWidth();
+        BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                int pixel = img.getRGB(i, j);
+                // Creating a Color object from pixel value
+                Color color = new Color(pixel, true);
+                // Retrieving the R G B values
+                int red = color.getRed();
+                int green = color.getGreen();
+                int blue = color.getBlue();
+
+                // get the sum of RGB pixels values
+                int sum = red + green + blue;
+                // 150 + 150 + 150 = 450 (middle value given by prof)
+
+                if (sum >= 450) {
+                    bi.setRGB(i, j, Color.WHITE.getRGB()); // 255
+                } else {
+                    bi.setRGB(i, j, Color.BLACK.getRGB()); // 0
+                }
+            }
+        }
+        return bi;
+    }
+
+    private BufferedImage smoothImage(BufferedImage img) {
         curr_action = SMOOTH;
 
+        int height = img.getHeight();
+        int width = img.getWidth();
+
+        BufferedImage smoothed_image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+        int window[] = new int[9];
+        int rgb[] = new int[3];
+        int rgbSum;
+        int edges = 1;
+
+        Color color;
+
+        for (int x = 2; x < width; x++) { // For each
+            for (int y = 2; y < height; y++) { // pixel
+
+                for (int c = 0; c < 3; c++) { // For each color (R, G, B)
+
+                    int i = 0;
+                    for (int fx = 0; fx < 3; fx++) { // For each
+                        for (int fy = 0; fy < 3; fy++) { // neighbour
+                            window[i] = getPixelValue(img, c, x + fx - edges, y + fy - edges); // Put each neighbour
+                                                                                               // into array
+                            i++;
+                        }
+                    }
+                    Arrays.sort(window); // Sort the array
+                    rgb[c] = window[4]; // The median of a fixed size 9
+                }
+                color = new Color(rgb[0], rgb[1], rgb[2]); // Create new color
+                rgbSum = color.getRGB(); // get pixel RGB value
+                smoothed_image.setRGB(x, y, rgbSum); // Set the value
+            }
+        }
+        return smoothed_image;
+    }
+
+    public int getPixelValue(BufferedImage img, int color, int x, int y) {
+        Color col = new Color(img.getRGB(x - 1, y - 1));
+        switch (color) {
+            case 0:
+                return col.getRed();
+            case 1:
+                return col.getGreen();
+            case 2:
+                return col.getBlue();
+            default:
+                return -1;
+        }
     }
 
     private JLabel uploadImage(BufferedImage img) {
 
         ImageIcon original = new ImageIcon(img);
         display_new_image.setIcon(original);
-        display_new_image.setBounds(100, 360, original.getIconWidth(), original.getIconHeight());
+        display_new_image.setBounds(100, display_orig_image.getHeight() + 50, original.getIconWidth(),
+                original.getIconHeight());
 
         // img_label.repaint();
         frame.add(display_new_image);
 
         return display_new_image;
-    }
-
-    private void reset() {
-        if (curr_action == SMOOTH || curr_action == BINARY) {
-            slider.setVisible(false);
-            slider.setEnabled(false);
-        }
-
     }
 
 }
