@@ -23,13 +23,26 @@ public class Interface extends JFrame  {
    private TheSlider theSlider;
     private int value; // value from slideBar
 
+
+
     // Menus
     JMenuBar menuBar;
     JMenu menuOp, menuIm;
     JMenuItem menuBright, menuBinary, menuSmooth, menuUpload;
 
 
+
     public Interface (){
+
+
+
+
+
+
+
+
+
+
 
 
         frame = new JFrame("frame");
