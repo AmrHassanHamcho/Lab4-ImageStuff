@@ -52,11 +52,13 @@ public class Interface extends JFrame {
 
     public void navigationBar() {
 
+        display_new_image = new JLabel();
+
         // Main Menu bar
         menuBar = new JMenuBar();
 
         // Menu to operate on an Image
-        menuOp = new JMenu("Operation");
+        menuOp = new JMenu("Operatizon");
 
         // Menu to upload an image
         menuIm = new JMenu("Image");
@@ -187,6 +189,7 @@ public class Interface extends JFrame {
 
     private BufferedImage brightImage(BufferedImage img) {
         curr_action = BRIGHT;
+        reset();
 
         int height = img.getHeight();
         int width = img.getWidth();
@@ -258,9 +261,8 @@ public class Interface extends JFrame {
     }
 
     private void reset() {
-        if (curr_action == BRIGHT) {
-
-        } else {
+        if (curr_action == SMOOTH || curr_action == BINARY) {
+            slider.setVisible(false);
             slider.setEnabled(false);
         }
 
